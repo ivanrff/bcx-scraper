@@ -1,2 +1,5 @@
 *.html
 *.txt
+/siscarga
+*.zip
+test.py
