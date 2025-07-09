@@ -130,29 +130,9 @@ def handle_processing_results(data_list: list[dict]):
         return False # Indica insucesso
 
 # --- Função Principal do Programa ---
-def main():
+def main(current_bl_number):
     global REPROCESS_INTERVAL_SECONDS # Permite modificar a variável global
-    current_folder_path = "" # Variável para armazenar o caminho da pasta atual
-    current_bl_number = "" # Variável para armazenar o BL atual
-
-    print("--- Processamento de Dados Siscomex (Simulado - Google Colab) ---")
-
-    # Solicitar caminho da pasta (primeira vez)
-    print("\nATENÇÃO: Certifique-se de que seus arquivos HTML estão na pasta do Colab (ex: /content/minha_pasta).")
-    while True:
-        current_folder_path = input("Digite o caminho completo da pasta com os arquivos HTML de teste (ex: /content/html_files): ")
-        if os.path.isdir(current_folder_path):
-            break
-        else:
-            notify_messaging_service(f"O caminho da pasta '{current_folder_path}' não é válido ou não existe. Por favor, tente novamente.", "error")
-
-    # Solicitar BL (primeira vez)
-    while True:
-        current_bl_number = input("Digite o número do BL (DEVE TER 17 DIGITOS, ex: 99999999900000000): ")
-        if len(current_bl_number) == 17 and current_bl_number.isdigit():
-            break
-        else:
-            print("ERRO: O número do BL deve ter exatamente 17 dígitos. Por favor, tente novamente.")
+    current_folder_path = "siscarga/html_gerados" # Caminho dos htmls
 
     running = True
     while running:
