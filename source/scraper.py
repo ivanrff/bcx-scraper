@@ -269,4 +269,4 @@ def main(current_bl_number):
                 running = False
 
 if __name__ == "__main__":
-    main()
+    main('99999999999999123')
