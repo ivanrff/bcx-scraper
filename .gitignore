@@ -1,6 +1,6 @@
 *.html
-*.txt
 /siscarga
 *.zip
 test.py
 /dump
+/source/__pycache__
