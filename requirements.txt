@@ -1,0 +1,3 @@
+flask
+pymongo
+kafka-python
