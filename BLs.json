@@ -1,0 +1,76 @@
+{
+    "manifesto_conhecimento":
+    {
+        "num": 123,
+        "carregamento": "CNSHK -  SHEKOU",
+        "descarregamento": "BRNVT /  BRNVT001 -  TERMINAL PORTONAVE - NAVEGANTES - SC",
+        "tipo_conhecimento": "HBL",
+        "bl_servico": "N",
+        "n_ce": "182305210833631",
+        "data_emissao_bl": "02/08/2023"
+    },
+    "embarcador":
+    {
+        "dados_complementares": "Complementar embarcador"
+    },
+    "consignatario":
+    {
+        "bl_a_ordem": "N",
+        "cnpj_cpf": 99999999999999,
+        "razao_social_nome": "Consignatario",
+        "dados_complementares": "Complmento consginatario"
+    },
+    "parte_a_ser_notificada":
+    {
+        "cnpj_cpf": 999999999999999,
+        "razao_social_nome": "Notificada",
+        "dados_complementares": "Complmento"
+    },
+    "transportador_representante":
+    {
+        "cnpj": 99999999999999,
+        "razao_social": "Transportadora"
+    },
+    "origem_destino_carga":
+    {
+        "bl_conhecimento_embarque_original": 99999999999999123,
+        "origem":
+        {
+            "porto": "CNSHK - SHEKOU",
+            "pais_procedencia": "CHINA"
+        },
+        "destino":
+        {
+            "uf": "SC",
+            "porto": "BRNVT - NAVEGANTES",
+            "numero_doc_despacho": "2317998715"
+        }
+    },
+    "mercadoria":
+    {
+        "descricao1": "1800 CARTONS CONTAIN COMMODE CHAIR",
+        "descricao2": "",
+        "peso": "13.302,000",
+        "cubagem": "133,400",
+        "categoria": "IMPORTADA",
+        "situacao":
+        {
+            "atual": "ENTREGUE",
+            "data_entrega": "14/09/2023"
+        }
+    },
+    "frete":
+    {
+        "recolhimento": "COLLECT",
+        "modalidade": "HH - HOUSE TO HOUSE",
+        "moeda": "220 - DOLAR DOS EUA",
+        "valor": "5.700,00",
+        "componentes":
+        {
+            "componente": "16ª CAPATA",
+            "moeda": "790 - REAL/BRASIL",
+            "valor": "1.612,00",
+            "recolhimento": "COLLECT"
+        }
+    }
+}
