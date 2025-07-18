@@ -1,31 +1,11 @@
-import os
-import time
 from datetime import datetime
-## import json
 from bs4 import BeautifulSoup, Tag
 import re
-## from kafka import KafkaConsumer
-from pymongo import MongoClient
 from copy import deepcopy
-
-# Mongo client
-client = MongoClient("mongodb://admin:admin@localhost:27017/")
-
-# Colecoes na db
-pending_ce_collection = client["bcx_db"]["pending_ce"]
-bls_collection = client["bcx_db"]["bls"]
 
 # --- Constantes para os textos e tags a serem buscados ---
 BL_SEARCH_TEXT = "o BL do Conhecimento de Embarque Orig"
 CE_MERCANTE_DT_TAG = "No. CE-MERCANTE Master vinculado :"
-
-# consumer = KafkaConsumer(
-#     "scrapper-find-bl",
-#     bootstrap_servers="kafka:9092",
-#     value_deserializer=lambda m: json.loads(m.decode("utf-8")),
-#     group_id="bls-to-scrap",
-#     auto_offset_reset="earliest"
-# )
 
 # Títulos H2 para as seções de informações a serem coletadas
 JSON_FINAL = {
@@ -305,86 +285,3 @@ def process_html_data(html_content: str, bl_number: str, filename: str) -> dict 
                     extracted_data["json_final"]["frete"]["componentes"]["recolhimento"] = cols[3].get_text(strip=True).replace('\xa0', ' ')
 
     return extracted_data
-
-# --- Função Principal do Programa ---
-def scraper(current_bl_number, current_folder_path = "siscarga/html_gerados"):
-
-    html_files = [f for f in os.listdir(current_folder_path) if f.endswith(('.html', '.htm'))]
-
-    if not html_files:
-        sem_html_na_pasta = f"[{datetime.now()}] Nenhum arquivo HTML (.html ou .htm) encontrado na pasta: {current_folder_path}"
-        print(sem_html_na_pasta)
-        return sem_html_na_pasta
-
-    print(f"\n--- Iniciando processamento de {len(html_files)} arquivo(s) na pasta '{current_folder_path}' ---")
-
-    for filename in html_files:
-        full_filepath = os.path.join(current_folder_path, filename)
-        print(f"\n[{datetime.now()}] Processando arquivo: {filename}")
-        html_content = read_html_file(full_filepath)
-
-        if html_content:
-            # Usa o BL da rodada atual
-            collected_data = process_html_data(html_content, current_bl_number, filename)
-            if collected_data:
-                break
-    
-    print(f"\n--- Finalizado processamento de {len(html_files)} arquivo(s) na pasta '{current_folder_path}' ---")
-
-    # --- Log de Sucesso/Insucesso ---
-    if collected_data: # Se a lista de dados coletados não estiver vazia
-
-        bl_number = collected_data["json_final"]["origem_destino_carga"]["bl_conhecimento_embarque_original"]
-        ce_number = collected_data["json_final"]["manifesto_conhecimento"]["n_ce"]
-        
-        # Em caso não haja numero de CE, inserir na collection de pending_CEs
-        if ((ce_number == None) | (ce_number == "")):
-            print(f"[{datetime.now()}] BL {bl_number} encontrado mas CE não encontrado.")
-            
-            # checa se o BL em questão já estava na base de dados de pending_CEs
-            bl_in_pending_ce_collection = pending_ce_collection.find_one({"nr_bl": bl_number})
-            
-            # se não está, inserir (EVITAR DUPLICIDADE)
-            if not bl_in_pending_ce_collection:
-                pending_ce_collection.insert_one({"nr_bl": bl_number})
-                print(f"[{datetime.now()}] BL {bl_number} inserido na coleção de CEs pendentes.")
-            else:
-                print(f"[{datetime.now()}] BL {bl_number} já estava na coleção de CEs pendentes.")
-
-            # checa se o BL em questão já estava na base de dados de BLs
-            bl_in_collection = bls_collection.find_one({"origem_destino_carga.bl_conhecimento_embarque_original": bl_number})
-
-            # se  não está, inserir
-            if not bl_in_collection:
-                bls_collection.insert_one(collected_data["json_final"])
-                print(f"[{datetime.now()}] BL {bl_number} inserido na coleção de BLs.")
-
-            return collected_data['json_final']
-
-        else:
-            # buscar se o bl já havia sido registrado na base de dados
-            old_bl_data = bls_collection.find_one({"origem_destino_carga.bl_conhecimento_embarque_original": bl_number})
-            
-            # se sim, atualizar tudo, reescrevendo tudo
-            if old_bl_data:
-                bls_collection.update_one({"origem_destino_carga.bl_conhecimento_embarque_original": bl_number}, {"$set": collected_data["json_final"]})
-                print(f"[{datetime.now()}] BL {bl_number} atualizado na coleção de BLs.")
-            # se não, cria nova entrada
-            else:
-                bls_collection.insert_one(collected_data["json_final"])
-                print(f"[{datetime.now()}] BL {bl_number} inserido na coleção de BLs.")
-
-            return collected_data['json_final']
-
-    else:
-        no_data = "Nenhum dado relevante encontrado nesta rodada de processamento."
-        print(no_data)
-        return no_data
-
-# for msg in consumer:
-#     data = msg.value
-#     current_bl_number = data.get("bl")
-
-#     main(current_bl_number = current_bl_number, current_folder_path = "siscarga/html_gerados")
-if __name__ == "__main__":
-    scraper(current_bl_number = "99999999999999998", current_folder_path = "siscarga/html_gerados")

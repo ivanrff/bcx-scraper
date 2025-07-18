@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Verificação de BL via SSE</title>
+</head>
+<body>
+  <h1>Status do BL:</h1>
+
+  <form id="blForm">
+    <label for="client_id">Client ID:</label>
+    <input type="text" id="client_id" required><br><br>
+
+    <label for="bl">BL:</label>
+    <input type="text" id="bl" required><br><br>
+
+    <button type="submit">Verificar BL</button>
+  </form>
+
+  <div id="status" style="margin-top:20px;"></div>
+
+  <script>
+    document.getElementById("blForm").addEventListener("submit", function(e) {
+      e.preventDefault(); // evita recarregar a página
+
+      document.getElementById("status").innerHTML = "";
+
+      const client_id = document.getElementById("client_id").value;
+      const bl = document.getElementById("bl").value;
+
+      const eventSource = new EventSource(`http://localhost:5000/check_bl_sse?client_id=${client_id}&bl=${bl}`);
+
+      eventSource.onmessage = function(event) {
+        const data = JSON.parse(event.data);
+        const statusDiv = document.getElementById("status");
+        if (data.mensagem) {
+          statusDiv.innerHTML += `<p>${data.mensagem}</p>`;
+        } else if (data.erro) {
+          statusDiv.innerHTML += `<p style="color:red;"><strong>Erro:</strong> ${data.erro}</p>`;
+        } else {
+          statusDiv.innerHTML += `<p>${JSON.stringify(data)}</p>`;
+        }
+
+        if (data.finalizado) {
+          eventSource.close();
+        }
+      };
+    });
+  </script>
+</body>
+</html>
